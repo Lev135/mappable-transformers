@@ -1,10 +1,12 @@
 module Control.Monad.Writer.Mappable where
 
-import Control.Monad.Except (ExceptT)
+import Control.Monad.Identity (IdentityT)
 import Control.Monad.Reader (ReaderT)
 import qualified Control.Monad.State.Lazy as L
 import qualified Control.Monad.State.Strict as S
+import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.Trans.Mappable (MappableTrans (mapTrans))
+import Control.Monad.Trans.Maybe (MaybeT)
 import Control.Monad.Writer (MonadWriter)
 import qualified Control.Monad.Writer.Lazy as L
 import qualified Control.Monad.Writer.Strict as S
@@ -51,3 +53,11 @@ instance
 instance
   (MappableWriter w w' m m') =>
   MappableWriter w w' (ExceptT e m) (ExceptT e m')
+
+instance
+  (MappableWriter e e' m m') =>
+  MappableWriter e e' (MaybeT m) (MaybeT m')
+
+instance
+  (MappableWriter e e' m m') =>
+  MappableWriter e e' (IdentityT m) (IdentityT m')

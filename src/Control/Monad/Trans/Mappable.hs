@@ -1,10 +1,13 @@
 module Control.Monad.Trans.Mappable where
 
-import Control.Monad.Except (ExceptT, mapExceptT)
+import Control.Monad.Identity (IdentityT, mapIdentityT)
 import Control.Monad.Reader (ReaderT, mapReaderT)
 import qualified Control.Monad.State.Lazy as L
 import qualified Control.Monad.State.Strict as S
 import Control.Monad.Trans (MonadTrans)
+import Control.Monad.Trans.Accum (AccumT, mapAccumT)
+import Control.Monad.Trans.Except (ExceptT, mapExceptT)
+import Control.Monad.Trans.Maybe (MaybeT, mapMaybeT)
 import qualified Control.Monad.Writer.Lazy as L
 import qualified Control.Monad.Writer.Strict as S
 
@@ -28,3 +31,12 @@ instance MappableTrans (ReaderT r) where
 
 instance MappableTrans (ExceptT e) where
   mapTrans = mapExceptT
+
+instance MappableTrans MaybeT where
+  mapTrans = mapMaybeT
+
+instance Monoid w => MappableTrans (AccumT w) where
+  mapTrans = mapAccumT
+
+instance MappableTrans IdentityT where
+  mapTrans = mapIdentityT

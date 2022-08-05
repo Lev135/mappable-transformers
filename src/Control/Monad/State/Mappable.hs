@@ -1,11 +1,14 @@
 module Control.Monad.State.Mappable where
 
-import Control.Monad.Except (ExceptT)
+import Control.Monad.Identity (IdentityT)
 import Control.Monad.Reader (ReaderT (..))
 import Control.Monad.State (MonadState)
 import qualified Control.Monad.State.Lazy as L
 import qualified Control.Monad.State.Strict as S
+import Control.Monad.Trans.Accum (AccumT)
+import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.Trans.Mappable (MappableTrans (mapTrans))
+import Control.Monad.Trans.Maybe (MaybeT)
 import qualified Control.Monad.Writer.Lazy as L
 import qualified Control.Monad.Writer.Strict as S
 import Data.Bifunctor (Bifunctor (..))
@@ -47,3 +50,15 @@ instance
 instance
   (MappableState s s' m m') =>
   MappableState s s' (ExceptT e m) (ExceptT e m')
+
+instance
+  (MappableState e e' m m') =>
+  MappableState e e' (MaybeT m) (MaybeT m')
+
+instance
+  (Monoid w, MappableState e e' m m') =>
+  MappableState e e' (AccumT w m) (AccumT w m')
+
+instance
+  (MappableState e e' m m') =>
+  MappableState e e' (IdentityT m) (IdentityT m')
