@@ -3,9 +3,9 @@
 
 module Reader where
 
-import Control.Monad.Reader (MonadReader, asks)
+import Control.Monad.Reader (MonadReader, asks, runReader, runReaderT)
 import Control.Monad.Reader.Mappable (MappableReader (mapReader))
-import Control.Monad.Writer (MonadWriter (tell))
+import Control.Monad.Writer (MonadWriter (tell), runWriter, runWriterT)
 import Control.Monad.Writer.Mappable (MappableWriter (mapWriter))
 
 -- | Environment for 'foo' function
@@ -46,3 +46,14 @@ foobar = do
   fooRes <- mapReader fooData foo
   barRes <- mapReader barData bar
   return $ fooRes + barRes
+
+main :: IO ()
+main = do
+  print . runWriter . flip runReaderT env $ foobar
+  print . flip runReader env . runWriterT $ foobar
+  where
+    env =
+      FooBar
+        { fooData = Foo {fooInt = 42, fooDouble = 3.14},
+          barData = Bar {barString = "Hello", barDouble = 36.6}
+        }
