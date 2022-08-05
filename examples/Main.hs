@@ -1,7 +1,10 @@
+--  'AllowAmbiguousTypes' extension needed only to map writer's log using 'show'
+-- (I don't clearly understand why it is so)
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE TupleSections #-}
 {-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS_GHC -Wno-partial-type-signatures #-}
 
 module Main where
 
@@ -11,6 +14,8 @@ import Control.Monad.Except.Mappable (MappableError (mapError))
 import Control.Monad.State (MonadState (..), modify, runState, runStateT)
 import Control.Monad.Writer (MonadWriter (tell), runWriter, runWriterT)
 import Control.Monad.Writer.Mappable (MappableWriter (mapWriter))
+
+-- * Two functions, each with its own error type
 
 newtype FooErr = EvenFooCall Int
   deriving (Show)
@@ -23,7 +28,9 @@ foo = do
     then throwError $ EvenFooCall n
     else do
       modify succ
-      return $ show n
+      n' <- get
+      tell [n']
+      return $ show n'
 
 newtype BarErr = BarOddCall Int
   deriving (Show)
@@ -36,27 +43,40 @@ bar = do
     then throwError $ BarOddCall n
     else do
       modify pred
-      return $ show n
+      n' <- get
+      tell [n']
+      return $ show n'
 
+-- | Composed error type
 data FooBarErr = FooErr FooErr | BarErr BarErr
   deriving (Show)
 
 foobar ::
   _ =>
+  -- There is awful constraint with 5 monad type variables here, but we can
+  -- leave a hole and everything will work fine
+  -- (it won't if we omit type signature
+  -- --- in that case ghc won't understand, that we want to use abstract
+  -- classes instead of concrete transformers)
   m String
 foobar = do
   x <- get
-  fooRes <- mapWriter (map (("in foo: ",))) . mapError FooErr $ foo
+  -- The order of maps calls ('mapWriter'/'mapError') doesn't matter
+  -- even if these affects doesn't commute
+  fooRes <- mapWriter (map (("in foo: " <>) . show)) . mapError FooErr $ foo
+  put x
+  -- We'll see the same here, if the first call succeeded
+  _ <- mapError FooErr . mapWriter (map (("foo again: " <>) . show)) $ foo
   modify (+ x `div` 2)
-  barRes <- mapError BarErr . mapWriter (map (("in bar: ",))) $ bar
+  barRes <- mapError BarErr . mapWriter (map (("in bar: " <>) . show)) $ bar
   return $ unwords [fooRes, barRes]
-
-tmp :: MappableWriter [Int] [String] m m' => m ()
-tmp = pure ()
 
 main :: IO ()
 main = forM_ ([1 .. 5] :: [Int]) $ \n -> do
   print n
+  -- Mappable classes as well as simple classes from mtl
+  -- let us run transformer in arbitrary order
+  -- (with different results, naturally)
   print . runWriter . flip runStateT n . runExceptT $ foobar
   print . runWriter . runExceptT . flip runStateT n $ foobar
   print . flip runState n . runWriterT . runExceptT $ foobar
