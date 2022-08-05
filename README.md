@@ -8,7 +8,7 @@ environment, log, state and error respectively.
 Examples
 ===
 
-Errors
+MappableError
 ---
 
 Assume, we have two stateful computations, that can fail with different errors:
@@ -88,3 +88,61 @@ leaving constraints' inference for compiler, and it also works fine.
 
 Note, that we can't omit type signature at all, because in that case
 compiler will try to use concrete transformer combination instead of classes.
+
+MappableReader
+---
+Let's think about complex environment
+```haskell
+data FooEnv = ...
+data BarEnv = ...
+data FooBarEnv = FooBarEnv {fooEnv :: FooEnv, barEnv :: BarEnv}
+```
+and two functions `foo` and `bar`, using `fooEnv` and `barEnv` parts 
+respectively and writing log
+```haskell
+foo :: (MonadWriter SomeLog m, MonadReader FooEnv m) => m Int
+bar :: (MonadWriter SomeLog m, MonadReader BarEnv m) => m Int
+```
+Using this package we can combine them like in previous example with errors:
+```haskell
+foobar :: (MonadWriter SomeLog m, MonadReader FooBarEnv m, _) => m Int
+foobar = do
+  fooRes <- mapReader fooEnv foo
+  barRes <- mapReader barEnv bar
+  return $ fooRes + barRes
+```
+Note, that `mapReader` is contravariant, i. e. takes function making `foo`'s
+environment from `foobar`'s, that confuses despite it's natural.
+
+MappableState
+---
+Think about `FooBarState` composed from `FooState` and `BarState` as in example
+with environment above
+```haskell
+data FooBarState = FooBarState {fooState :: FooState, barState :: BarState}
+```
+And stateful functions writing log, each for its part of state:
+```haskell
+foo :: (MonadWriter SomeLog m, MonadState FooState m) => m Int
+bar :: (MonadWriter SomeLog m, MonadState BarState m) => m Int
+```
+Composing them will be a bit more difficult, than in previous cases.
+We should pass getter and setter to mapState. Compare types:
+```haskell
+mapError :: forall a. (e -> e') -> m a -> m' a
+mapReader :: forall a. (r' -> r) -> m a -> m' a
+mapState :: forall a. (s' -> s) -> (s -> s' -> s') -> m a -> m' a
+``` 
+Error/environment/state types of subfunctions (such as `foo` and `bar`)
+are provided without dashes, while composed function (`foobar`) types --- with
+dashes. So the first argument for `mapState` is as in `mapReader` --- just 
+`fooState`/`barState` while the second function is to set processed substate
+`FooState`/`BarState` in `FooBarState` so the following code close the issue of
+composing states
+```haskell
+foobar :: (MonadWriter SomeLog m, MonadState FooBarState m, _) => m Int
+foobar = do
+  fooRes <- mapState fooState (\fooState s -> s{fooState}) foo
+  barRes <- mapState barState (\barState s -> s{barState}) bar
+  return $ fooRes + barRes
+```
