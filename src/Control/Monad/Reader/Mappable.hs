@@ -19,14 +19,14 @@ class
       r m' -> m,
       r' m -> m'
   where
-  mapReader :: forall a. (r' -> r) -> m a -> m' a
-  default mapReader ::
+  mapTReader :: forall a. (r' -> r) -> m a -> m' a
+  default mapTReader ::
     (MappableTrans t, MappableReader r r' n n', m ~ t n, m' ~ t n') =>
     forall a. (r' -> r) -> m a -> m' a
-  mapReader f = mapTrans (mapReader f)
+  mapTReader f = mapTrans (mapTReader f)
 
 instance Monad m => MappableReader r r' (ReaderT r m) (ReaderT r' m) where
-  mapReader f (ReaderT ka) = ReaderT $ ka . f
+  mapTReader f (ReaderT ka) = ReaderT $ ka . f
 
 instance
   (MappableReader r r' m m') =>

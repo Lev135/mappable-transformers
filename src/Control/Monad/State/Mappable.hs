@@ -21,18 +21,18 @@ class
       s m' -> m,
       s' m -> m'
   where
-  mapState :: forall a. (s' -> s) -> (s -> s' -> s') -> m a -> m' a
-  default mapState ::
+  mapTState :: forall a. (s' -> s) -> (s -> s' -> s') -> m a -> m' a
+  default mapTState ::
     (MappableTrans t, MappableState s s' n n', m ~ t n, m' ~ t n') =>
     forall a. (s' -> s) -> (s -> s' -> s') -> m a -> m' a
-  mapState get set = mapTrans (mapState get set)
+  mapTState get set = mapTrans (mapTState get set)
 
 instance Monad m => MappableState s s' (S.StateT s m) (S.StateT s' m) where
-  mapState get set ma = S.StateT $ \s' ->
+  mapTState get set ma = S.StateT $ \s' ->
     fmap (second (`set` s')) (S.runStateT ma (get s'))
 
 instance Monad m => MappableState s s' (L.StateT s m) (L.StateT s' m) where
-  mapState get set ma = L.StateT $ \s' ->
+  mapTState get set ma = L.StateT $ \s' ->
     fmap (second (`set` s')) (L.runStateT ma (get s'))
 
 instance

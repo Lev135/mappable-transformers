@@ -55,13 +55,13 @@ This approach is simple, but has several disadvantages:
   it can be difficult for people to recognize it from the first sight.
 
 This package provides alternative solution.  
-Using `Control.Monad.Except.Mappable.mapError` we can write `foobar` literally
+Using `Control.Monad.Except.Mappable.mapTError` we can write `foobar` literally
 as follows:
 ```haskell
 foobar :: (MonadState SomeState m, MonadError FooBarErr m, _) => m Int
 foobar = do
-  fooRes <- mapError FooErr foo
-  barRes <- mapError BarErr bar
+  fooRes <- mapTError FooErr foo
+  barRes <- mapTError BarErr bar
   return $ fooRes + barRes
 ```
 Note the type hole in constraint. It is here, because we haven't listed all 
@@ -107,11 +107,11 @@ Using this package we can combine them like in previous example with errors:
 ```haskell
 foobar :: (MonadWriter SomeLog m, MonadReader FooBarEnv m, _) => m Int
 foobar = do
-  fooRes <- mapReader fooEnv foo
-  barRes <- mapReader barEnv bar
+  fooRes <- mapTReader fooEnv foo
+  barRes <- mapTReader barEnv bar
   return $ fooRes + barRes
 ```
-Note, that `mapReader` is contravariant, i. e. takes function making `foo`'s
+Note, that `mapTReader` is contravariant, i. e. takes function making `foo`'s
 environment from `foobar`'s, that confuses despite it's natural.
 
 MappableState
@@ -127,22 +127,22 @@ foo :: (MonadWriter SomeLog m, MonadState FooState m) => m Int
 bar :: (MonadWriter SomeLog m, MonadState BarState m) => m Int
 ```
 Composing them will be a bit more difficult, than in previous cases.
-We should pass getter and setter to mapState. Compare types:
+We should pass getter and setter to mapTState. Compare types:
 ```haskell
-mapError :: forall a. (e -> e') -> m a -> m' a
-mapReader :: forall a. (r' -> r) -> m a -> m' a
-mapState :: forall a. (s' -> s) -> (s -> s' -> s') -> m a -> m' a
+mapTError :: forall a. (e -> e') -> m a -> m' a
+mapTReader :: forall a. (r' -> r) -> m a -> m' a
+mapTState :: forall a. (s' -> s) -> (s -> s' -> s') -> m a -> m' a
 ``` 
 Error/environment/state types of subfunctions (such as `foo` and `bar`)
 are provided without dashes, while composed function (`foobar`) types --- with
-dashes. So the first argument for `mapState` is as in `mapReader` --- just 
+dashes. So the first argument for `mapTState` is as in `mapTReader` --- just 
 `fooState`/`barState` while the second function is to set processed substate
 `FooState`/`BarState` in `FooBarState` so the following code close the issue of
 composing states
 ```haskell
 foobar :: (MonadWriter SomeLog m, MonadState FooBarState m, _) => m Int
 foobar = do
-  fooRes <- mapState fooState (\fooState s -> s{fooState}) foo
-  barRes <- mapState barState (\barState s -> s{barState}) bar
+  fooRes <- mapTState fooState (\fooState s -> s{fooState}) foo
+  barRes <- mapTState barState (\barState s -> s{barState}) bar
   return $ fooRes + barRes
 ```

@@ -4,9 +4,9 @@
 module Reader where
 
 import Control.Monad.Reader (MonadReader, asks, runReader, runReaderT)
-import Control.Monad.Reader.Mappable (MappableReader (mapReader))
+import Control.Monad.Reader.Mappable (MappableReader (mapTReader))
 import Control.Monad.Writer (MonadWriter (tell), runWriter, runWriterT)
-import Control.Monad.Writer.Mappable (MappableWriter (mapWriter))
+import Control.Monad.Writer.Mappable (MappableWriter (mapTWriter))
 
 -- | Environment for 'foo' function
 data Foo = Foo {fooInt :: Int, fooDouble :: Double}
@@ -43,8 +43,8 @@ foobar ::
   ) =>
   m Int
 foobar = do
-  fooRes <- mapReader fooData foo
-  barRes <- mapReader barData bar
+  fooRes <- mapTReader fooData foo
+  barRes <- mapTReader barData bar
   return $ fooRes + barRes
 
 main :: IO ()

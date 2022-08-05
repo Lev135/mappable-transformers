@@ -10,11 +10,11 @@ module Except where
 
 import Control.Monad (forM_)
 import Control.Monad.Except (MonadError (..))
-import Control.Monad.Except.Mappable (MappableError (mapError))
+import Control.Monad.Except.Mappable (MappableError (mapTError))
 import Control.Monad.State (MonadState (..), modify, runState, runStateT)
 import Control.Monad.Trans.Except (runExcept, runExceptT)
 import Control.Monad.Writer (MonadWriter (tell), runWriter, runWriterT)
-import Control.Monad.Writer.Mappable (MappableWriter (mapWriter))
+import Control.Monad.Writer.Mappable (MappableWriter (mapTWriter))
 
 -- * Two functions, each with its own error type
 
@@ -62,14 +62,14 @@ foobar ::
   m String
 foobar = do
   x <- get
-  -- The order of maps calls ('mapWriter'/'mapError') doesn't matter
+  -- The order of maps calls ('mapTWriter'/'mapTError') doesn't matter
   -- even if these affects doesn't commute
-  fooRes <- mapWriter (map (("in foo: " <>) . show)) . mapError FooErr $ foo
+  fooRes <- mapTWriter (map (("in foo: " <>) . show)) . mapTError FooErr $ foo
   put x
   -- We'll see the same here, if the first call succeeded
-  _ <- mapError FooErr . mapWriter (map (("foo again: " <>) . show)) $ foo
+  _ <- mapTError FooErr . mapTWriter (map (("foo again: " <>) . show)) $ foo
   modify (+ x `div` 2)
-  barRes <- mapError BarErr . mapWriter (map (("in bar: " <>) . show)) $ bar
+  barRes <- mapTError BarErr . mapTWriter (map (("in bar: " <>) . show)) $ bar
   return $ unwords [fooRes, barRes]
 
 main :: IO ()

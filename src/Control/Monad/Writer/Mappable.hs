@@ -20,23 +20,23 @@ class
       w m' -> m,
       w' m -> m'
   where
-  mapWriter :: forall a. (w -> w') -> m a -> m' a
-  default mapWriter ::
+  mapTWriter :: forall a. (w -> w') -> m a -> m' a
+  default mapTWriter ::
     (MappableTrans t, MappableWriter w w' n n', m ~ t n, m' ~ t n') =>
     forall a. (w -> w') -> m a -> m' a
-  mapWriter f = mapTrans (mapWriter f)
+  mapTWriter f = mapTrans (mapTWriter f)
 
 instance
   (Monoid w, Monoid w', Monad m) =>
   MappableWriter w w' (S.WriterT w m) (S.WriterT w' m)
   where
-  mapWriter f = S.mapWriterT (fmap $ second f)
+  mapTWriter f = S.mapWriterT (fmap $ second f)
 
 instance
   (Monoid w, Monoid w', Monad m) =>
   MappableWriter w w' (L.WriterT w m) (L.WriterT w' m)
   where
-  mapWriter f = L.mapWriterT (fmap $ second f)
+  mapTWriter f = L.mapWriterT (fmap $ second f)
 
 instance
   (MappableWriter w w' m m') =>

@@ -21,14 +21,14 @@ class
       e m' -> m,
       e' m -> m'
   where
-  mapError :: forall a. (e -> e') -> m a -> m' a
-  default mapError ::
+  mapTError :: forall a. (e -> e') -> m a -> m' a
+  default mapTError ::
     (MappableTrans t, MappableError e e' n n', m ~ t n, m' ~ t n') =>
     forall a. (e -> e') -> m a -> m' a
-  mapError f = mapTrans (mapError f)
+  mapTError f = mapTrans (mapTError f)
 
 instance Monad m => MappableError e e' (ExceptT e m) (ExceptT e' m) where
-  mapError f = mapExceptT (fmap $ first f)
+  mapTError f = mapExceptT (fmap $ first f)
 
 instance
   (MappableError e e' m m') =>

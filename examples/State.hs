@@ -5,7 +5,7 @@
 module State where
 
 import Control.Monad.State (MonadState)
-import Control.Monad.State.Mappable (mapState)
+import Control.Monad.State.Mappable (mapTState)
 import Control.Monad.Writer.Class (MonadWriter)
 
 data SomeLog
@@ -30,6 +30,6 @@ data FooBarState = FooBarState {fooState :: FooState, barState :: BarState}
 
 foobar :: (MonadWriter SomeLog m, MonadState FooBarState m, _) => m Int
 foobar = do
-  fooRes <- mapState fooState (\fooState s -> s {fooState}) foo
-  barRes <- mapState barState (\barState s -> s {barState}) bar
+  fooRes <- mapTState fooState (\fooState s -> s {fooState}) foo
+  barRes <- mapTState barState (\barState s -> s {barState}) bar
   return $ fooRes + barRes
