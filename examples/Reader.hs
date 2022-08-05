@@ -32,7 +32,7 @@ bar = do
 
 data FooBar = FooBar {fooData :: Foo, barData :: Bar}
 
--- | 'foobar' function take hole 'FooBar' environment
+-- | 'foobar' function take whole 'FooBar' environment
 foobar ::
   -- We could omit this constraint and use wildcard as in Main.hs,
   -- it's explicit here only to make clearer how it works
