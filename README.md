@@ -84,8 +84,7 @@ Moreover, we can omit constraints totally and write as
 ```haskell
 foobar :: _ => m Int
 ```
-leaving constraints' inference for compiler, and it also be work fine
-(if `foo` and `bar` have concrete error type).
+leaving constraints' inference for compiler, and it also works fine.
 
 Note, that we can't omit type signature at all, because in that case
 compiler will try to use concrete transformer combination instead of classes.
