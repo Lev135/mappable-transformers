@@ -1,3 +1,15 @@
+{- ORMOLU_DISABLE -}
+{- |
+Module       : Control.Monad.Reader.Mappable
+Copyright    : (c) Lev Dvorkin, 2022
+License      : MIT
+Maintainer   : lev_135@mail.ru
+Stability    : Experimental
+
+This module contains type class for reader monads with mappable environment
+with instances for base transformers from transformers package
+-}
+{- ORMOLU_ENABLE -}
 module Control.Monad.Reader.Mappable where
 
 import Control.Monad.Identity (IdentityT)
