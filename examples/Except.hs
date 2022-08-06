@@ -3,7 +3,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE PartialTypeSignatures #-}
-{-# OPTIONS_GHC -Wall #-}
 {-# OPTIONS_GHC -Wno-partial-type-signatures #-}
 
 module Except where

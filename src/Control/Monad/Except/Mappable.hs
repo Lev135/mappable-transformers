@@ -13,6 +13,42 @@ import qualified Control.Monad.Writer.Lazy as L
 import qualified Control.Monad.Writer.Strict as S
 import Data.Bifunctor (first)
 
+{- ORMOLU_DISABLE -}
+{- | Type class for monad transformers with errors, that can be mappable
+  from @e@ to @e'@, changing composed monad type from m to m'.
+
+  Usually (as in example below), @e'@ is a sum type contains @e@ as one of
+  possible error message types
+
+==== __Example__
+
+  > :set -XFlexibleContexts
+
+  > import Control.Monad.Except (MonadError)
+  > import Control.Monad.Except.Mappable (mapTError, MappableError)
+  > import Control.Monad.State.Class (MonadState)
+  >
+  > data SomeState
+  >
+  > data FooErr
+  > foo :: (MonadState SomeState m, MonadError FooErr m) => m Int
+  > foo = undefined
+  >
+  > data BarErr
+  > bar :: (MonadState SomeState m, MonadError BarErr m) => m Int
+  > bar = undefined
+  >
+  > data FooOrBarErr = FooErr FooErr | BarErr BarErr
+  > foobar ::
+  >  (MappableError FooErr FooOrBarErr m1 m,
+  >   MappableError BarErr FooOrBarErr m2 m,
+  >   MonadState SomeState m1, MonadState SomeState m2) => m Int
+  > foobar = do
+  >   fooRes <- mapTError FooErr foo
+  >   barRes <- mapTError BarErr bar
+  >   return $ fooRes + barRes
+-}
+{- ORMOLU_ENABLE -}
 class
   (MonadError e m, MonadError e' m') =>
   MappableError (e :: *) (e' :: *) (m :: * -> *) (m' :: * -> *)
@@ -21,7 +57,18 @@ class
       e m' -> m,
       e' m -> m'
   where
-  mapTError :: forall a. (e -> e') -> m a -> m' a
+  -- | Map transformer's error from @e@ to @e'@.
+  --
+  -- Default realization just maps inner monad of transformer using
+  -- 'MappableTrans' instance
+  mapTError ::
+    forall a.
+    -- | map error value
+    (e -> e') ->
+    -- | initial computation
+    m a ->
+    -- | mapped computation
+    m' a
   default mapTError ::
     (MappableTrans t, MappableError e e' n n', m ~ t n, m' ~ t n') =>
     forall a. (e -> e') -> m a -> m' a

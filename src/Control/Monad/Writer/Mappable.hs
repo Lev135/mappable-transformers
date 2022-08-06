@@ -12,6 +12,42 @@ import qualified Control.Monad.Writer.Lazy as L
 import qualified Control.Monad.Writer.Strict as S
 import Data.Bifunctor (second)
 
+{- ORMOLU_DISABLE -}
+{- | Type class for monad transformers with log, that can be mappable
+  from @w@ to @w'@, changing composed monad type from m to m'.
+
+  Usually (as in example below), @w'@ is a sum type contains @w@ as one of
+  possible log message types
+
+==== __Example__
+
+  > :set -XFlexibleContexts
+
+  > import Control.Monad.State (MonadState)
+  > import Control.Monad.State.Mappable (mapTState, MappableState)
+  > import Control.Monad.Writer.Class (MonadWriter)
+  >
+  > data SomeLogMsg
+  >
+  > data FooState
+  > foo :: (MonadWriter [SomeLogMsg] m, MonadState FooState m) => m Int
+  > foo = undefined
+  >
+  > data BarState
+  > bar :: (MonadWriter [SomeLogMsg] m, MonadState BarState m) => m Int
+  > bar = undefined
+  >
+  > data FooBarState = FooBarState {fooState :: FooState, barState :: BarState}
+  > foobar ::
+  >  (MappableState FooState FooBarState m1 m,
+  >   MappableState BarState FooBarState m2 m,
+  >   MonadWriter [SomeLogMsg] m1, MonadWriter [SomeLogMsg] m2) => m Int
+  > foobar = do
+  >   fooRes <- mapTState fooState (\fooState s -> s{fooState}) foo
+  >   barRes <- mapTState barState (\barState s -> s{barState}) bar
+  >   return $ fooRes + barRes
+-}
+{- ORMOLU_ENABLE -}
 class
   (MonadWriter w m, MonadWriter w' m') =>
   MappableWriter (w :: *) (w' :: *) (m :: * -> *) (m' :: * -> *)
@@ -20,7 +56,18 @@ class
       w m' -> m,
       w' m -> m'
   where
-  mapTWriter :: forall a. (w -> w') -> m a -> m' a
+  -- | Map transformer's log from @w@ to @w'@.
+  --
+  -- Default realization just maps inner monad of transformer using
+  -- 'MappableTrans' instance
+  mapTWriter ::
+    forall a.
+    -- | map log value
+    (w -> w') ->
+    -- | initial computation
+    m a ->
+    -- | mapped computation
+    m' a
   default mapTWriter ::
     (MappableTrans t, MappableWriter w w' n n', m ~ t n, m' ~ t n') =>
     forall a. (w -> w') -> m a -> m' a

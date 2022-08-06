@@ -53,6 +53,10 @@ executable examples
     other-modules:    Reader
                       Except
                       State
+                      Doc.Except
+                      Doc.Reader
+                      Doc.State
+                      Doc.Writer
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

@@ -1,0 +1,9 @@
+indentation: 2
+comma-style: trailing
+import-export-style: trailing
+indent-wheres: true
+record-brace-space: false
+respectful: false
+# haddock-style: single-line
+newlines-between-decls: 1
+fixities: []
