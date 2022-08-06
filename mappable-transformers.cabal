@@ -1,23 +1,30 @@
 cabal-version:      3.0
 name:               mappable-transformers
 version:            0.1.0.0
-synopsis:
+synopsis:           
+    Classes for mapping 'mtl' transformers
+description:
+    This package extends `mtl` type classes to make possible change 
+    their type arguments without decomposing transformer
 
--- A longer description of the package.
--- description:
-homepage:
-
--- A URL where users can report bugs.
--- bug-reports:
+homepage:           https://github.com/Lev135/mappable-transformers
+bug-reports:        https://github.com/Lev135/mappable-transformers/issues
 license:            MIT
 license-file:       LICENSE
 author:             Lev135
-maintainer:         lev_135@mail.ru
+maintainer:         Lev Dvorkin <lev_135@mail.ru>
 
--- A copyright notice.
--- copyright:
+copyright:          Lev Dvorkin (c) 2022
 category:           Control
-extra-source-files: CHANGELOG.md
+build-type:         Simple
+extra-source-files: README.md
+                    CHANGELOG.md
+
+tested-with:        GHC == 8.10.7
+
+source-repository head
+    type:           git
+    location:       https://github.com/Lev135/mappable-transformers.git
 
 library
     exposed-modules:  Control.Monad.Trans.Mappable
@@ -26,10 +33,6 @@ library
                       Control.Monad.Reader.Mappable
                       Control.Monad.Except.Mappable
 
-    -- Modules included in this library but not exported.
-    -- other-modules:
-
-    -- LANGUAGE extensions used by modules in this package.
     default-extensions: FlexibleContexts
                         FlexibleInstances
                         FunctionalDependencies
@@ -49,7 +52,6 @@ library
 executable examples
     main-is:          Main.hs
 
-    -- Modules included in this executable, other than Main.
     other-modules:    Reader
                       Except
                       State
@@ -58,8 +60,6 @@ executable examples
                       Doc.State
                       Doc.Writer
 
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
     build-depends:    base ^>=4.14.3.0
                     , mtl
                     , transformers
