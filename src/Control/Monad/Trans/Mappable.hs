@@ -5,7 +5,6 @@ import Control.Monad.Reader (ReaderT, mapReaderT)
 import qualified Control.Monad.State.Lazy as L
 import qualified Control.Monad.State.Strict as S
 import Control.Monad.Trans (MonadTrans)
-import Control.Monad.Trans.Accum (AccumT, mapAccumT)
 import Control.Monad.Trans.Except (ExceptT, mapExceptT)
 import Control.Monad.Trans.Maybe (MaybeT, mapMaybeT)
 import qualified Control.Monad.Writer.Lazy as L
@@ -34,9 +33,6 @@ instance MappableTrans (ExceptT e) where
 
 instance MappableTrans MaybeT where
   mapTrans = mapMaybeT
-
-instance Monoid w => MappableTrans (AccumT w) where
-  mapTrans = mapAccumT
 
 instance MappableTrans IdentityT where
   mapTrans = mapIdentityT

@@ -5,7 +5,6 @@ import Control.Monad.Reader (ReaderT (..))
 import Control.Monad.State (MonadState)
 import qualified Control.Monad.State.Lazy as L
 import qualified Control.Monad.State.Strict as S
-import Control.Monad.Trans.Accum (AccumT)
 import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.Trans.Mappable (MappableTrans (mapTrans))
 import Control.Monad.Trans.Maybe (MaybeT)
@@ -105,10 +104,6 @@ instance
 instance
   (MappableState e e' m m') =>
   MappableState e e' (MaybeT m) (MaybeT m')
-
-instance
-  (Monoid w, MappableState e e' m m') =>
-  MappableState e e' (AccumT w m) (AccumT w m')
 
 instance
   (MappableState e e' m m') =>
